@@ -9,4 +9,3 @@ urlpatterns = [
     path("edit/<int:pk>/", ActivityView.as_view(), name="update"),
     path("delete/<int:pk>/", ActivityView.as_view(), name="delete"),
 ]
-print("urlpatters", urlpatterns)
