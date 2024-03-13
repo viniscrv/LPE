@@ -19,6 +19,9 @@ class Activity(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # TODO: period
 
+    def __str__(self):
+        return self.name
+
 class ReportActivity(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     EFFORT_PERCEPTION_CHOICES = (
