@@ -46,6 +46,8 @@ class ReportActivity(models.Model):
 
     def save(self, *args, **kwargs):
         if self.completed is True:
-            self.completed = datetime.now()
+            self.completed_at = datetime.now()
+        else:
+            self.completed_at = None
 
         return super().save(*args, **kwargs)
