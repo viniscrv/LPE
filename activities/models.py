@@ -25,6 +25,7 @@ class Activity(models.Model):
         return self.name
 
 class ReportActivity(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     EFFORT_PERCEPTION_CHOICES = (
         ("1", "1"),
