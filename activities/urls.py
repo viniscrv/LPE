@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ActivityGroupView, ActivityView, ReportActivityView
+from .views import ActivityGroupView, ActivityView, ReportActivityView, ActivityByGroupView
 
 app_name = "activities"
 
@@ -8,6 +8,7 @@ urlpatterns = [
     path("<int:pk>/", ActivityView.as_view(), name="detail"),
     path("edit/<int:pk>/", ActivityView.as_view(), name="update"),
     path("delete/<int:pk>/", ActivityView.as_view(), name="delete"),
+    path("by_group/<int:pk>/", ActivityByGroupView.as_view(), name="by_group"),
     path("groups/", ActivityGroupView.as_view(), name="groups"),
     path("groups/<int:pk>/", ActivityGroupView.as_view(), name="group_detail"),
     path("groups/edit/<int:pk>/", ActivityGroupView.as_view(), name="group_update"),

@@ -64,7 +64,7 @@ class ActivityGroupView(APIView):
         activity_group.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    
 class ActivityView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -85,7 +85,7 @@ class ActivityView(APIView):
         serializer = ActivitySerializer(activity)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
     def post(self, request):
         data = request.data
         data.update({ "profile": request.user.id })
@@ -119,6 +119,18 @@ class ActivityView(APIView):
         activity.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class ActivityByGroupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        profile = get_object_or_404(Profile, pk=request.user.id)
+        activity_group = get_object_or_404(ActivityGroup, pk=pk)
+
+        activities = Activity.objects.filter(profile=profile, activity_group=activity_group)
+        serializer = ActivitySerializer(activities, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 class ReportActivityView(APIView):
     permission_classes = [IsAuthenticated]
