@@ -6,6 +6,8 @@ class ActivityGroup(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(default="", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Activity(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)

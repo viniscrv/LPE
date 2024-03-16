@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Activity, ReportActivity
+from .models import ActivityGroup, Activity, ReportActivity
 # Register your models here.
+
+@admin.register(ActivityGroup)
+class ActivityGroupAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
