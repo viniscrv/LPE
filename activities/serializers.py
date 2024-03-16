@@ -4,7 +4,7 @@ from .models import Activity, ReportActivity
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
-        fields = ["id", "profile", "name", "recurrence", "until", "created_at", "updated_at"]
+        fields = ["id", "profile", "activity_group", "name", "recurrence", "until", "created_at", "updated_at"]
 
 class ReportActivitySerializer(serializers.ModelSerializer):
     class Meta:

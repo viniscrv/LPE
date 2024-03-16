@@ -2,8 +2,13 @@ from django.db import models
 from datetime import datetime
 from profiles.models import Profile
 
+class ActivityGroup(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(default="", blank=True)
+
 class Activity(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    activity_group = models.ForeignKey(ActivityGroup, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     RECURRENCE_CHOICES = (
         ("everyday", "everyday"),
