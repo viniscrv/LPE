@@ -8,4 +8,4 @@ class Profile(models.Model):
     biography = models.TextField(default="", blank=True)
 
     def __str__(self):
-        return self.profile.get_username()
+        return self.user.get_username()
