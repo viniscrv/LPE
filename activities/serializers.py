@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Activity, ReportActivity
+from .models import ActivityGroup, Activity, ReportActivity
+
+class ActivityGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityGroup
+        fields = ["id", "profile", "name", "description"]
 
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:

@@ -3,6 +3,7 @@ from datetime import datetime
 from profiles.models import Profile
 
 class ActivityGroup(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(default="", blank=True)
 
