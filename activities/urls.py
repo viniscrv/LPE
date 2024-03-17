@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ActivityGroupView, ActivityView, ReportActivityView, ActivityByGroupView
+from .views import ActivityGroupView, ActivityView, ReportActivityViewSet, ActivityByGroupView
 
 app_name = "activities"
 
@@ -13,8 +13,9 @@ urlpatterns = [
     path("groups/<int:pk>/", ActivityGroupView.as_view(), name="group_detail"),
     path("groups/edit/<int:pk>/", ActivityGroupView.as_view(), name="group_update"),
     path("groups/delete/<int:pk>/", ActivityGroupView.as_view(), name="group_delete"),
-    path("report/", ReportActivityView.as_view(), name="report"),
-    path("report/<int:pk>/", ReportActivityView.as_view(), name="report_detail"),
-    path("report/edit/<int:pk>/", ReportActivityView.as_view(), name="report_update"),
-    path("report/delete/<int:pk>/", ReportActivityView.as_view(), name="report_delete"),
+    path("report/", ReportActivityViewSet.as_view({"get": "get", "post": "post"}), name="report"),
+    path("report/<int:pk>/", ReportActivityViewSet.as_view({"get": "get"}), name="report_detail"),
+    path("report/edit/<int:pk>/", ReportActivityViewSet.as_view({"patch": "patch"}), name="report_update"),
+    path("report/delete/<int:pk>/", ReportActivityViewSet.as_view({"delete": "delete"}), name="report_delete"),
+    path("report/pending_today/", ReportActivityViewSet.as_view({"get": "get_pending_today"}), name="report_pending_today"),
 ]
