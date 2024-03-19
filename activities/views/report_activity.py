@@ -82,16 +82,36 @@ class ReportActivityViewSet(ViewSet):
             created_at__contains=datetime.today().strftime("%Y-%m-%d")
         )
 
-        # TODO: lidar com recorrencia de atividades
-        # TODO: lidar com until
         activities = Activity.objects.filter(
             profile=profile,
-            recurrence="everyday"
+            until__gte=datetime.today()
         )
 
-        reported_activities = [report.activity for report in today_reports]
-        pending_activities = [
+        def filter_by_recurrence(recurrence):
+            weekday = datetime.today().isoweekday()
+
+            if recurrence in ["everyday"]:
+                return True
+            
+            elif recurrence in ["week"]:
+                if weekday not in [0, 6]:
+                    return True
+
+            elif recurrence in ["weekend"]:
+                if weekday in [0, 7]:
+                    return True
+                
+            return False
+        
+        filtered_activities_by_recurrence = [
             activity for activity in activities 
+            if filter_by_recurrence(activity.recurrence)
+        ]
+
+        reported_activities = [report.activity for report in today_reports]
+
+        pending_activities = [
+            activity for activity in filtered_activities_by_recurrence 
             if activity not in reported_activities 
         ]
 
