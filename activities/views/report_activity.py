@@ -33,6 +33,15 @@ class ReportActivityViewSet(ViewSet):
         data = request.data
         data.update({ "profile": profile.pk })
 
+        requester_is_activity_owner = Activity.objects.filter(
+            profile = get_object_or_404(Profile, pk=request.user.id),
+            pk=request.data.get("activity")
+        )
+
+        # TODO: usar drf permissionamento para lidar com isso
+        if not requester_is_activity_owner:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = ReportActivitySerializer(data=request.data)
 
         if serializer.is_valid():
