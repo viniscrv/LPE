@@ -18,4 +18,5 @@ urlpatterns = [
     path("report/edit/<int:pk>/", ReportActivityViewSet.as_view({"patch": "patch"}), name="report_update"),
     path("report/delete/<int:pk>/", ReportActivityViewSet.as_view({"delete": "delete"}), name="report_delete"),
     path("report/pending_today/", ReportActivityViewSet.as_view({"get": "get_pending_today"}), name="report_pending_today"),
+    path("report/history/", ReportActivityViewSet.as_view({"get": "get_report_history"}), name="report_history"),
 ]

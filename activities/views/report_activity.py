@@ -118,3 +118,15 @@ class ReportActivityViewSet(ViewSet):
         serializer = ActivitySerializer(pending_activities, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False)
+    def get_report_history(self, request):
+        profile = get_object_or_404(Profile, pk=request.user.id)
+
+        reports = ReportActivity.objects.filter(
+            profile=profile,
+        ).order_by("-created_at")
+
+        serializer = ReportActivitySerializer(reports, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
