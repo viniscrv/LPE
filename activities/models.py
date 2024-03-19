@@ -9,6 +9,9 @@ class ActivityGroup(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
 class Activity(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     activity_group = models.ForeignKey(ActivityGroup, on_delete=models.SET_NULL, null=True)
