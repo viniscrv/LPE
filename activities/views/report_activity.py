@@ -9,12 +9,13 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from rest_framework.decorators import action
+from ..mixins import ActivityMixin
 
-class ReportActivityViewSet(ViewSet):
+class ReportActivityViewSet(ActivityMixin, ViewSet):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         if not pk:
             report_activities = ReportActivity.objects.filter(profile=profile)
@@ -28,13 +29,13 @@ class ReportActivityViewSet(ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         data = request.data
         data.update({ "profile": profile.pk })
 
         requester_is_activity_owner = Activity.objects.filter(
-            profile = get_object_or_404(Profile, pk=request.user.id),
+            profile = self.get_profile(request),
             pk=request.data.get("activity")
         )
 
@@ -62,7 +63,7 @@ class ReportActivityViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request, pk):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         report_activity = get_object_or_404(ReportActivity.objects.filter(profile=profile), pk=pk)
         serializer = ReportActivitySerializer(report_activity, data=request.data, partial=True)
@@ -75,7 +76,7 @@ class ReportActivityViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         report_activity = get_object_or_404(ReportActivity.objects.filter(profile=profile), pk=pk)
         report_activity.delete()
@@ -84,7 +85,7 @@ class ReportActivityViewSet(ViewSet):
     
     @action(methods=["get"], detail=False)
     def get_pending_today(self, request):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
         
         today_reports = ReportActivity.objects.filter(
             profile=profile,
@@ -130,7 +131,7 @@ class ReportActivityViewSet(ViewSet):
 
     @action(methods=["get"], detail=False)
     def get_report_history(self, request):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         reports = ReportActivity.objects.filter(
             profile=profile,

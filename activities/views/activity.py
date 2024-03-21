@@ -6,12 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from ..mixins import ActivityMixin
 
-class ActivityView(APIView):
+class ActivityView(ActivityMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         if not pk:
             activities = Activity.objects.filter(profile=profile)
@@ -42,7 +43,7 @@ class ActivityView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request, pk):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         activity = get_object_or_404(Activity.objects.filter(profile=profile), pk=pk)
         serializer = ActivitySerializer(activity, data=request.data, partial=True)
@@ -55,7 +56,7 @@ class ActivityView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
 
         activity = get_object_or_404(Activity.objects.filter(profile=profile), pk=pk)
         activity.delete()
@@ -66,7 +67,7 @@ class ActivityByGroupView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = self.get_profile(request)
         activity_group = get_object_or_404(ActivityGroup, pk=pk)
 
         activities = Activity.objects.filter(profile=profile, activity_group=activity_group)
