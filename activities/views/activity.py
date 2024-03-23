@@ -35,6 +35,10 @@ class ActivityView(ActivityMixin, APIView):
         data = request.data
         data.update({ "profile": profile.id })
 
+        if data.get("activity_group"):
+            if not ActivityGroup.objects.filter(profile=profile, pk=data["activity_group"]):
+                return Response({"detail": "Activity group not found."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = ActivitySerializer(data=data)
 
         if serializer.is_valid():
@@ -46,6 +50,10 @@ class ActivityView(ActivityMixin, APIView):
     
     def patch(self, request, pk):
         profile = self.get_profile(request)
+
+        if request.data.get("activity_group"):
+            if not ActivityGroup.objects.filter(profile=profile, pk=request.data["activity_group"]):
+                return Response({"detail": "Activity group not found."}, status=status.HTTP_404_NOT_FOUND)
 
         activity = get_object_or_404(Activity.objects.filter(profile=profile), pk=pk)
         serializer = ActivitySerializer(activity, data=request.data, partial=True)
