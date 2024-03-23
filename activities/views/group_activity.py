@@ -30,8 +30,10 @@ class ActivityGroupView(ActivityMixin, APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        profile = self.get_profile(request)
+
         data = request.data
-        data.update({ "profile": request.user.id })
+        data.update({ "profile": profile.id })
 
         serializer = ActivityGroupSerializer(data=data)
 

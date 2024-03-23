@@ -4,6 +4,6 @@ from django.shortcuts import get_object_or_404
 
 class ActivityMixin(ABC):
     def get_profile(self, request):
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = get_object_or_404(Profile, user=request.user.id)
 
         return profile

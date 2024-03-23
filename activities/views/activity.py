@@ -30,8 +30,10 @@ class ActivityView(ActivityMixin, APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
+        profile = self.get_profile(request)
+
         data = request.data
-        data.update({ "profile": request.user.id })
+        data.update({ "profile": profile.id })
 
         serializer = ActivitySerializer(data=data)
 
@@ -63,7 +65,7 @@ class ActivityView(ActivityMixin, APIView):
         
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-class ActivityByGroupView(APIView):
+class ActivityByGroupView(ActivityMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):

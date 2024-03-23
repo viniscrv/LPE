@@ -7,9 +7,8 @@ from .serializers import ProfileSerializer, UserSerializer
 
 class ProfileView(APIView):
     def get(self, request):
-        print("request.user.id", request.user.id)
+        profile = get_object_or_404(Profile, user=request.user.id)
 
-        profile = get_object_or_404(Profile, pk=request.user.id)
         serializer = ProfileSerializer(profile)
 
         return Response(serializer.data, status.HTTP_200_OK)
@@ -45,7 +44,7 @@ class ProfileView(APIView):
     def patch(self, request):
         data = request.data
 
-        profile = get_object_or_404(Profile, pk=request.user.id)
+        profile = get_object_or_404(Profile, user=request.user.id)
         serializer = ProfileSerializer(profile, data=data, partial=True)
 
         if serializer.is_valid():

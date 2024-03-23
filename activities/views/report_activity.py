@@ -29,7 +29,11 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
 
             return paginator.get_paginated_response(serializer.data)
 
-        report_activity = get_object_or_404(ReportActivity, pk=pk)
+        report_activity = get_object_or_404(
+            ReportActivity.objects.filter(profile=profile), 
+            pk=pk
+        )
+        
         serializer = ReportActivitySerializer(report_activity)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -101,7 +105,7 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
             profile=profile,
             until__gte=datetime.today()
         )
-
+        
         def filter_by_recurrence(recurrence):
             weekday = datetime.today().isoweekday()
 
@@ -109,11 +113,11 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
                 return True
             
             elif recurrence in ["week"]:
-                if weekday not in [0, 6]:
+                if weekday in [1, 2, 3, 4, 5]:
                     return True
 
             elif recurrence in ["weekend"]:
-                if weekday in [0, 7]:
+                if weekday in [0, 6]:
                     return True
                 
             return False
