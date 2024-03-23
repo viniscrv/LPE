@@ -7,6 +7,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
 from rest_framework.decorators import action
 from ..mixins import ActivityMixin
@@ -19,10 +20,15 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
 
         if not pk:
             report_activities = ReportActivity.objects.filter(profile=profile)
-            serializer = ReportActivitySerializer(report_activities, many=True)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
+            paginator = PageNumberPagination()
+            # paginator.page_size = 10
+            page = paginator.paginate_queryset(report_activities, request)
+            
+            serializer = ReportActivitySerializer(page, many=True)
+
+            return paginator.get_paginated_response(serializer.data)
+
         report_activity = get_object_or_404(ReportActivity, pk=pk)
         serializer = ReportActivitySerializer(report_activity)
 
@@ -34,14 +40,13 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
         data = request.data
         data.update({ "profile": profile.pk })
 
-        requester_is_activity_owner = Activity.objects.filter(
-            profile = self.get_profile(request),
+        activity = Activity.objects.filter(
+            profile=profile,
             pk=request.data.get("activity")
         )
 
-        # TODO: usar drf permissionamento para lidar com isso
-        if not requester_is_activity_owner:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not activity:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = ReportActivitySerializer(data=request.data)
 
@@ -137,6 +142,10 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
             profile=profile,
         ).order_by("-created_at")
 
-        serializer = ReportActivitySerializer(reports, many=True)
+        paginator = PageNumberPagination()
+        # paginator.page_size = 10
+        page = paginator.paginate_queryset(reports, request)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = ReportActivitySerializer(page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
