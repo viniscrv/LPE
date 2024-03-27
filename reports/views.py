@@ -40,32 +40,56 @@ class ReportActivities(ViewSet):
                     most_performed[activity] = count
 
         return Response(most_performed, status=status.HTTP_200_OK)
-    
+
     @action(methods=["get"], detail=True)
     def get_best_streak(self, request):
         profile = get_object_or_404(Profile, user=request.user.id)
 
         reports = ReportActivity.objects.filter(profile=profile).order_by("completed_at")
 
-        print("reports", reports)
-
         streaks = {}
 
+        def get_next_day(previous_date, recurrence):
+            previous_date_weekday = previous_date.isoweekday()
+
+            if recurrence in ["everyday"]:
+                return previous_date + timedelta(days=1)
+            
+            elif recurrence in ["week"]:
+                if previous_date_weekday in [1, 2, 3, 4]:
+                    return previous_date + timedelta(days=1)
+                
+                len_full_week = 7
+                days_until_next_monday = previous_date_weekday - len_full_week
+
+                return previous_date + timedelta(days=days_until_next_monday)
+                
+            elif recurrence in ["weekend"]:
+                if previous_date_weekday in [6]:
+                    return previous_date + timedelta(days=1)
+                
+                len_full_week = 7
+                days_until_next_saturday = previous_date_weekday - len_full_week
+
+                return previous_date + timedelta(days=days_until_next_saturday)
+                
+            return previous_date
+        
         for report in reports:
             activity = report.activity
 
-            # TODO: fazer para as outras recorrencias
-            if activity.recurrence in ["everyday"]:
-                if activity.name not in streaks:
-                    streaks[activity.name] = { "streak": 1, "previous_date": report.completed_at }
+            if activity.name not in streaks:
+                streaks[activity.name] = { "streak": 1, "previous_date": report.completed_at }
 
-                    continue
+                continue
 
-                expected_next_day = streaks[activity.name]["previous_date"] + timedelta(days=1)
+            expected_next_day = get_next_day(
+                streaks[activity.name]["previous_date"], activity.recurrence
+            )
 
-                if report.completed_at.day == expected_next_day.day:
-                    streaks[activity.name]["streak"] += 1
-                    streaks[activity.name]["previous_date"] = report.completed_at
+            if report.completed_at.day == expected_next_day.day:
+                streaks[activity.name]["streak"] += 1
+                streaks[activity.name]["previous_date"] = report.completed_at
 
         best_streak = {}
 
