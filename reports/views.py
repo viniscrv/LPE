@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from activities.models import ReportActivity
 from profiles.models import Profile
+from datetime import timedelta
 
 class ReportActivities(ViewSet):
     permission_classes = [IsAuthenticated]
@@ -38,7 +39,44 @@ class ReportActivities(ViewSet):
                     
                     most_performed[activity] = count
 
-        print(most_performed)
-
         return Response(most_performed, status=status.HTTP_200_OK)
+    
+    @action(methods=["get"], detail=True)
+    def get_best_streak(self, request):
+        profile = get_object_or_404(Profile, user=request.user.id)
 
+        reports = ReportActivity.objects.filter(profile=profile).order_by("completed_at")
+
+        print("reports", reports)
+
+        streaks = {}
+
+        for report in reports:
+            activity = report.activity
+
+            # TODO: fazer para as outras recorrencias
+            if activity.recurrence in ["everyday"]:
+                if activity.name not in streaks:
+                    streaks[activity.name] = { "streak": 1, "previous_date": report.completed_at }
+
+                    continue
+
+                expected_next_day = streaks[activity.name]["previous_date"] + timedelta(days=1)
+
+                if report.completed_at.day == expected_next_day.day:
+                    streaks[activity.name]["streak"] += 1
+                    streaks[activity.name]["previous_date"] = report.completed_at
+
+        best_streak = {}
+
+        for activity_name, streak in streaks.items():
+            if not best_streak:
+                best_streak[activity_name] = streak["streak"]
+
+            for top_activity, top_streak in best_streak.items():
+                if streak["streak"] > top_streak:
+                    del best_streak[top_activity]
+                    
+                    best_streak[activity] = streak["streak"]
+
+        return Response(best_streak, status=status.HTTP_200_OK)
