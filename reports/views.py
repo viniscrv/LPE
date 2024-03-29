@@ -101,6 +101,56 @@ class ReportActivities(ViewSet):
                 if streak["streak"] > top_streak:
                     del best_streak[top_activity]
                     
-                    best_streak[activity] = streak["streak"]
+                    best_streak[activity_name] = streak["streak"]
 
         return Response(best_streak, status=status.HTTP_200_OK)
+    
+    # TODO: nome paia
+    @action(methods=["get"], detail=True)
+    def get_edges_difficulty_activities_to_perform(self, request):
+        profile = get_object_or_404(Profile, user=request.user.id)
+
+        reports = ReportActivity.objects.filter(profile=profile)
+
+        effort_history = {}
+
+        for report in reports:
+            activity = report.activity
+
+            if activity not in effort_history:
+                effort_history[activity.name] = []
+
+            effort_history[activity.name].append(report.effort_perception)
+
+        edges_activity = {
+            "highest": {},
+            "lowest": {},
+        }
+
+        for activity_name, efforts in effort_history.items():
+            average_effort = sum(
+                [int(effort) for effort in efforts]
+            ) / len(efforts)
+            
+            if not edges_activity["highest"] or not edges_activity["lowest"]:
+
+                edges_activity["highest"][activity_name] = average_effort
+                edges_activity["lowest"][activity_name] = average_effort
+
+            # TODO: pra que dois for? ... ver se é realmente necessario
+            # TODO: essa assinatura ta ruim, vou manter assim pra não sair do padrão das outras rdn por enquanto, mas fica 
+            # melhor "edges_activity": {"highest": {"activity": "blabla", "avg": "9.5"}, ...}
+            for edge in edges_activity.values():
+                edge_activity_name = edge.keys()[0]
+
+                if average_effort > edges_activity["highest"][edge_activity_name]:
+                    
+                    edges_activity["highest"] = {}
+                    edges_activity["highest"][activity] = average_effort
+
+                if average_effort < edges_activity["lowest"][edge_activity_name]:
+                    
+                    edges_activity["lowest"] = {}
+                    edges_activity["lowest"][activity] = average_effort
+
+        return Response(edges_activity, status=status.HTTP_200_OK)

@@ -14,4 +14,9 @@ urlpatterns = [
         ReportActivities.as_view({"get": "get_best_streak"}),
         name="best_streak"
     ),
+    path(
+        "edges_difficulty_activities_to_perform/",
+        ReportActivities.as_view({"get": "get_edges_difficulty_activities_to_perform"}),
+        name="edges_difficulty_activities_to_perform"
+    ),
 ]
