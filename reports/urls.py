@@ -24,4 +24,9 @@ urlpatterns = [
         ReportHabits.as_view({"get": "get_habit_formation_progress"}),
         name="habit_formation_progress"
     ),
+    path(
+        "habit_disintegration_progress/",
+        ReportHabits.as_view({"get": "get_habit_disintegration_progress"}),
+        name="habit_disintegration_progress"
+    ),
 ]
