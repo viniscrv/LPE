@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from activities.models import ReportActivity
+from activities.serializers import ActivitySerializer
 from profiles.models import Profile
 from datetime import timedelta
 
@@ -23,9 +24,9 @@ class ReportActivities(ViewSet):
             report_activity = report.activity
 
             if report_activity not in reports_count:
-                reports_count[report_activity.name] = 0
+                reports_count[report_activity] = 0
             
-            reports_count[report_activity.name] += 1
+            reports_count[report_activity] += 1
 
         most_performed = {}
 
@@ -38,8 +39,9 @@ class ReportActivities(ViewSet):
                 most_performed["activity"] = activity
                 most_performed["count"] = count
 
-        # TODO: ajustar para a assinatura
-        # most_performed = {"activity": {<serialized acitivity>}}
+        serializer = ActivitySerializer(most_performed["activity"])
+        most_performed["activity"] = serializer.data
+
         return Response(most_performed, status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=True)
@@ -79,29 +81,32 @@ class ReportActivities(ViewSet):
         for report in reports:
             activity = report.activity
 
-            if activity.name not in streaks:
-                streaks[activity.name] = { "streak": 1, "previous_date": report.completed_at }
+            if activity not in streaks:
+                streaks[activity] = { "streak": 1, "previous_date": report.completed_at }
 
                 continue
 
             expected_next_day = get_next_day(
-                streaks[activity.name]["previous_date"], activity.recurrence
+                streaks[activity]["previous_date"], activity.recurrence
             )
 
             if report.completed_at.day == expected_next_day.day:
-                streaks[activity.name]["streak"] += 1
-                streaks[activity.name]["previous_date"] = report.completed_at
+                streaks[activity]["streak"] += 1
+                streaks[activity]["previous_date"] = report.completed_at
 
         best_streak = {}
 
-        for activity_name, streak in streaks.items():
+        for activity, streak in streaks.items():
             if not best_streak:
-                best_streak["activity"] = activity_name
+                best_streak["activity"] = activity
                 best_streak["streak"] = streak["streak"]
 
             if streak["streak"] > best_streak["streak"]:
-                best_streak["activity"] = activity_name
+                best_streak["activity"] = activity
                 best_streak["streak"] = streak["streak"]
+
+        serializer = ActivitySerializer(best_streak["activity"])
+        best_streak["activity"] = serializer.data
 
         return Response(best_streak, status=status.HTTP_200_OK)
     
@@ -117,10 +122,10 @@ class ReportActivities(ViewSet):
         for report in reports:
             activity = report.activity
 
-            if activity.name not in effort_history:
-                effort_history[activity.name] = []
+            if activity not in effort_history:
+                effort_history[activity] = []
 
-            effort_history[activity.name].append(report.effort_perception)
+            effort_history[activity].append(report.effort_perception)
 
         edges_activity = {
             "highest": {},
@@ -133,13 +138,13 @@ class ReportActivities(ViewSet):
             for field in fields:
                 edges_activity[level][field] = activity_data[field]
 
-        for activity_name, efforts in effort_history.items():
+        for activity, efforts in effort_history.items():
             average_effort = sum(
                 [int(effort) for effort in efforts]
             ) / len(efforts)
 
             activity_data = {
-                "activity": activity_name,
+                "activity": activity,
                 "average_effort": average_effort,
             }
             
@@ -152,5 +157,9 @@ class ReportActivities(ViewSet):
             
             if average_effort < edges_activity["lowest"]["average_effort"]:
                 fill_edge(level="lowest", activity_data=activity_data)
+
+        for level in edges_activity:
+            serializer = ActivitySerializer(edges_activity[level]["activity"])
+            edges_activity[level]["activity"] = serializer.data
 
         return Response(edges_activity, status=status.HTTP_200_OK)
