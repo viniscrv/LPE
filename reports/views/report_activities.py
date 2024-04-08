@@ -31,14 +31,15 @@ class ReportActivities(ViewSet):
 
         for activity, count in reports_count.items():
             if not most_performed:
-                most_performed[activity] = count
+                most_performed["activity"] = activity
+                most_performed["count"] = count
 
-            for top_activity, top_count in most_performed.items():
-                if count > top_count:
-                    del most_performed[top_activity]
-                    
-                    most_performed[activity] = count
+            if count > most_performed["count"]:
+                most_performed["activity"] = activity
+                most_performed["count"] = count
 
+        # TODO: ajustar para a assinatura
+        # most_performed = {"activity": {<serialized acitivity>}}
         return Response(most_performed, status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=True)
@@ -95,13 +96,12 @@ class ReportActivities(ViewSet):
 
         for activity_name, streak in streaks.items():
             if not best_streak:
-                best_streak[activity_name] = streak["streak"]
+                best_streak["activity"] = activity_name
+                best_streak["streak"] = streak["streak"]
 
-            for top_activity, top_streak in best_streak.items():
-                if streak["streak"] > top_streak:
-                    del best_streak[top_activity]
-                    
-                    best_streak[activity_name] = streak["streak"]
+            if streak["streak"] > best_streak["streak"]:
+                best_streak["activity"] = activity_name
+                best_streak["streak"] = streak["streak"]
 
         return Response(best_streak, status=status.HTTP_200_OK)
     
