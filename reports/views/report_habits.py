@@ -13,10 +13,7 @@ from activities.serializers import ActivitySerializer
 class ReportHabits(ViewSet):
     permission_classes = [IsAuthenticated]
 
-    @action(methods=["get"], detail=True)
-    def get_habit_formation_progress(self, request):
-        profile = get_object_or_404(Profile, user=request.user.id)
-
+    def _get_all_streaks(self, profile):
         def get_predecessor_day(previous_date, recurrence):
             previous_date_weekday = previous_date.isoweekday()
 
@@ -66,6 +63,14 @@ class ReportHabits(ViewSet):
             if report.completed_at.day == expected_predecessor_day.day:
                 streaks[activity]["streak"] += 1
                 streaks[activity]["previous_date"] = report.completed_at
+
+        return streaks
+
+    @action(methods=["get"], detail=True)
+    def get_habit_formation_progress(self, request):
+        profile = get_object_or_404(Profile, user=request.user.id)
+
+        streaks = self._get_all_streaks(profile)
 
         # TODO: fazer para outras recorrencias
         recent_reports = ReportActivity.objects.filter(
@@ -95,55 +100,7 @@ class ReportHabits(ViewSet):
     def get_habit_disintegration_progress(self, request):
         profile = get_object_or_404(Profile, user=request.user.id)
 
-        def get_predecessor_day(previous_date, recurrence):
-            previous_date_weekday = previous_date.isoweekday()
-
-            if recurrence in ["everyday"]:
-                return previous_date - timedelta(days=1)
-            
-            elif recurrence in ["week"]:
-                if previous_date_weekday in [1, 2, 3, 4]:
-                    return previous_date - timedelta(days=1)
-                
-                len_full_week = 7
-                days_until_next_monday = previous_date_weekday - len_full_week
-
-                return previous_date - timedelta(days=days_until_next_monday)
-                
-            elif recurrence in ["weekend"]:
-                if previous_date_weekday in [6]:
-                    return previous_date - timedelta(days=1)
-                
-                len_full_week = 7
-                days_until_next_saturday = previous_date_weekday - len_full_week
-
-                return previous_date - timedelta(days=days_until_next_saturday)
-                
-            return previous_date
-
-        reports = ReportActivity.objects.filter(profile=profile).order_by("-completed_at")
-
-        streaks = {}
-
-        for report in reports:
-            activity = report.activity
-
-            if activity not in streaks:
-                streaks[activity] = {
-                    "streak": 1, 
-                    "previous_date": report.completed_at,
-                    "last_report": report.completed_at
-                }
-
-                continue
-
-            expected_predecessor_day = get_predecessor_day(
-                streaks[activity]["previous_date"], activity.recurrence
-            )
-
-            if report.completed_at.day == expected_predecessor_day.day:
-                streaks[activity]["streak"] += 1
-                streaks[activity]["previous_date"] = report.completed_at
+        streaks = self._get_all_streaks(profile)
 
         # TODO: fazer para outras recorrencias
         recent_reports = ReportActivity.objects.filter(
@@ -177,55 +134,7 @@ class ReportHabits(ViewSet):
     def get_current_habits(self, request):
         profile = get_object_or_404(Profile, user=request.user.id)
 
-        def get_predecessor_day(previous_date, recurrence):
-            previous_date_weekday = previous_date.isoweekday()
-
-            if recurrence in ["everyday"]:
-                return previous_date - timedelta(days=1)
-            
-            elif recurrence in ["week"]:
-                if previous_date_weekday in [1, 2, 3, 4]:
-                    return previous_date - timedelta(days=1)
-                
-                len_full_week = 7
-                days_until_next_monday = previous_date_weekday - len_full_week
-
-                return previous_date - timedelta(days=days_until_next_monday)
-                
-            elif recurrence in ["weekend"]:
-                if previous_date_weekday in [6]:
-                    return previous_date - timedelta(days=1)
-                
-                len_full_week = 7
-                days_until_next_saturday = previous_date_weekday - len_full_week
-
-                return previous_date - timedelta(days=days_until_next_saturday)
-                
-            return previous_date
-
-        reports = ReportActivity.objects.filter(profile=profile).order_by("-completed_at")
-
-        streaks = {}
-
-        for report in reports:
-            activity = report.activity
-
-            if activity not in streaks:
-                streaks[activity] = {
-                    "streak": 1, 
-                    "previous_date": report.completed_at,
-                    "last_report": report.completed_at
-                }
-
-                continue
-
-            expected_predecessor_day = get_predecessor_day(
-                streaks[activity]["previous_date"], activity.recurrence
-            )
-
-            if report.completed_at.day == expected_predecessor_day.day:
-                streaks[activity]["streak"] += 1
-                streaks[activity]["previous_date"] = report.completed_at
+        streaks = self._get_all_streaks(profile)
 
         # TODO: fazer para outras recorrencias
         recent_reports = ReportActivity.objects.filter(
