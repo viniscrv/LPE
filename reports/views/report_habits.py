@@ -102,33 +102,26 @@ class ReportHabits(ViewSet):
 
         streaks = self._get_all_streaks(profile)
 
-        # TODO: fazer para outras recorrencias
-        recent_reports = ReportActivity.objects.filter(
-            Q(profile=profile),
-            Q(created_at__contains=(datetime.today() - timedelta(days=1)).strftime("%Y-%m-%d")) |
-            Q(created_at__contains=(datetime.today()).strftime("%Y-%m-%d")) 
-        )
-
-        recent_activities = [report.activity for report in recent_reports]
-        
-        streaks_in_progress = []
+        disintegrate_habits = []
 
         for streak_activity, data in streaks.items():
-            if streak_activity not in recent_activities:
+            if streak_activity:
+
+                if data["streak"] < 66:
+                    continue
+
+                diff_last_report_for_habit_mark = data["last_report"] - (datetime.today() - timedelta(days=66))
+
+                if diff_last_report_for_habit_mark <= 0:
+                    continue
 
                 serializer = ActivitySerializer(streak_activity)
                 data["activity"] = serializer.data
-                # TODO: globalizar na classe o 66
-                # TODO: ver se remover tzinfo pode dar problema
-                data["days_until_disintegrate_habit"] = abs(
-                    (
-                        datetime.today() - data["last_report"].replace(tzinfo=None)
-                    ).days - 66
-                )
+                data["days_until_disintegrate_habit"] = diff_last_report_for_habit_mark
 
-                streaks_in_progress.append(data)
+                disintegrate_habits.append(data)
 
-        return Response(streaks_in_progress, status=status.HTTP_200_OK)
+        return Response(disintegrate_habits, status=status.HTTP_200_OK)
     
     @action(methods=["get"], detail=True)
     def get_current_habits(self, request):
@@ -145,17 +138,17 @@ class ReportHabits(ViewSet):
 
         recent_activities = [report.activity for report in recent_reports]
         
-        streaks_in_progress = []
+        current_habits = []
 
         for streak_activity, data in streaks.items():
-            if streak_activity not in recent_activities:
+            if streak_activity in recent_activities:
 
-                if not data["streak"] >= 66:
+                if data["streak"] < 66:
                     continue
 
                 serializer = ActivitySerializer(streak_activity)
                 data["activity"] = serializer.data
 
-                streaks_in_progress.append(data)
+                current_habits.append(data)
 
-        return Response(streaks_in_progress, status=status.HTTP_200_OK)
+        return Response(current_habits, status=status.HTTP_200_OK)
