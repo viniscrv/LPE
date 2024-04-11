@@ -8,6 +8,7 @@ from activities.models import ReportActivity
 from profiles.models import Profile
 from datetime import datetime, timedelta
 from django.db.models import Q
+from activities.serializers import ActivitySerializer
 
 class ReportHabits(ViewSet):
     permission_classes = [IsAuthenticated]
@@ -49,8 +50,8 @@ class ReportHabits(ViewSet):
         for report in reports:
             activity = report.activity
 
-            if activity.name not in streaks:
-                streaks[activity.name] = {
+            if activity not in streaks:
+                streaks[activity] = {
                     "streak": 1, 
                     "previous_date": report.completed_at,
                     "last_report": report.completed_at
@@ -59,12 +60,12 @@ class ReportHabits(ViewSet):
                 continue
 
             expected_predecessor_day = get_predecessor_day(
-                streaks[activity.name]["previous_date"], activity.recurrence
+                streaks[activity]["previous_date"], activity.recurrence
             )
 
             if report.completed_at.day == expected_predecessor_day.day:
-                streaks[activity.name]["streak"] += 1
-                streaks[activity.name]["previous_date"] = report.completed_at
+                streaks[activity]["streak"] += 1
+                streaks[activity]["previous_date"] = report.completed_at
 
         # TODO: fazer para outras recorrencias
         recent_reports = ReportActivity.objects.filter(
@@ -73,7 +74,7 @@ class ReportHabits(ViewSet):
             Q(created_at__contains=(datetime.today()).strftime("%Y-%m-%d")) 
         )
 
-        recent_activities = [report.activity.name for report in recent_reports]
+        recent_activities = [report.activity for report in recent_reports]
         
         streaks_in_progress = [
             streaks[streak_activity] for streak_activity 
@@ -85,7 +86,10 @@ class ReportHabits(ViewSet):
 
         for streak_activity, data in streaks.items():
             if streak_activity in recent_activities:
-                data["activity"] = streak_activity
+                
+                serializer = ActivitySerializer(streak_activity)
+                data["activity"] = serializer.data
+
                 # TODO: globalizar na classe o 66
                 data["days_until_habit"] = 66 - data["streak"]
 
@@ -130,8 +134,8 @@ class ReportHabits(ViewSet):
         for report in reports:
             activity = report.activity
 
-            if activity.name not in streaks:
-                streaks[activity.name] = {
+            if activity not in streaks:
+                streaks[activity] = {
                     "streak": 1, 
                     "previous_date": report.completed_at,
                     "last_report": report.completed_at
@@ -140,12 +144,12 @@ class ReportHabits(ViewSet):
                 continue
 
             expected_predecessor_day = get_predecessor_day(
-                streaks[activity.name]["previous_date"], activity.recurrence
+                streaks[activity]["previous_date"], activity.recurrence
             )
 
             if report.completed_at.day == expected_predecessor_day.day:
-                streaks[activity.name]["streak"] += 1
-                streaks[activity.name]["previous_date"] = report.completed_at
+                streaks[activity]["streak"] += 1
+                streaks[activity]["previous_date"] = report.completed_at
 
         # TODO: fazer para outras recorrencias
         recent_reports = ReportActivity.objects.filter(
@@ -154,7 +158,7 @@ class ReportHabits(ViewSet):
             Q(created_at__contains=(datetime.today()).strftime("%Y-%m-%d")) 
         )
 
-        recent_activities = [report.activity.name for report in recent_reports]
+        recent_activities = [report.activity for report in recent_reports]
         
         streaks_in_progress = [
             streaks[streak_activity] for streak_activity 
@@ -166,7 +170,9 @@ class ReportHabits(ViewSet):
 
         for streak_activity, data in streaks.items():
             if streak_activity not in recent_activities:
-                data["activity"] = streak_activity
+
+                serializer = ActivitySerializer(streak_activity)
+                data["activity"] = serializer.data
                 # TODO: globalizar na classe o 66
                 # TODO: ver se remover tzinfo pode dar problema
                 data["days_until_disintegrate_habit"] = abs(
