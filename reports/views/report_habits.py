@@ -76,12 +76,6 @@ class ReportHabits(ViewSet):
 
         recent_activities = [report.activity for report in recent_reports]
         
-        streaks_in_progress = [
-            streaks[streak_activity] for streak_activity 
-            in streaks.keys() 
-            if streak_activity in recent_activities
-        ]
-
         streaks_in_progress = []
 
         for streak_activity, data in streaks.items():
@@ -160,12 +154,6 @@ class ReportHabits(ViewSet):
 
         recent_activities = [report.activity for report in recent_reports]
         
-        streaks_in_progress = [
-            streaks[streak_activity] for streak_activity 
-            in streaks.keys() 
-            if streak_activity in recent_activities
-        ]
-
         streaks_in_progress = []
 
         for streak_activity, data in streaks.items():
