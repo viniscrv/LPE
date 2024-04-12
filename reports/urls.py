@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ReportActivities, ReportHabits
+from .views import ReportGroupActivities, ReportActivities, ReportHabits
 
 app_name = "reports"
 
@@ -18,6 +18,11 @@ urlpatterns = [
         "edges_difficulty_activities_to_perform/",
         ReportActivities.as_view({"get": "get_edges_difficulty_activities_to_perform"}),
         name="edges_difficulty_activities_to_perform"
+    ),
+    path(
+        "edges_difficulty_group_activities_to_perform/",
+        ReportGroupActivities.as_view({"get": "get_edges_difficulty_group_activities_to_perform"}),
+        name="edges_difficulty_group_activities_to_perform"
     ),
     path(
         "habit_formation_progress/",
