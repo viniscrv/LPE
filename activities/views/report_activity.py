@@ -1,14 +1,12 @@
 from django.shortcuts import get_object_or_404
 from ..serializers import ReportActivitySerializer, ActivitySerializer
 from ..models import ReportActivity, Activity
-from profiles.models import Profile
-from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from datetime import datetime
+from datetime import datetime, timedelta
 from rest_framework.decorators import action
 from ..mixins import ActivityMixin
 
@@ -135,6 +133,21 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
         ]
 
         serializer = ActivitySerializer(pending_activities, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False)
+    def get_report_history_today(self, request):
+        profile = self.get_profile(request)
+
+        today_beginning = datetime.today().replace(hour=0, minute=0, second=0)
+
+        reports = ReportActivity.objects.filter(
+            profile=profile,
+            created_at__gte=today_beginning
+        ).order_by("-created_at")
+
+        serializer = ReportActivitySerializer(reports, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
