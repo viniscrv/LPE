@@ -1,11 +1,14 @@
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Profile
 from .serializers import ProfileSerializer, UserSerializer
+from rest_framework.decorators import action
+from django.contrib.auth import get_user_model
 
-class ProfileView(APIView):
+class ProfileView(ViewSet):
     def get(self, request):
         profile = get_object_or_404(Profile, user=request.user.id)
 
@@ -53,3 +56,19 @@ class ProfileView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=["patch"], detail=True)
+    def edit_password(self, request):
+        data = request.data
+
+        User = get_user_model()
+
+        user = User.objects.get(pk=request.user.id)
+
+        if user:
+            user.set_password(data.get("password"))
+            user.save()
+            
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_404_NOT_FOUND)
