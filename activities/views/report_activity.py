@@ -44,7 +44,7 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
 
         activity = Activity.objects.filter(
             profile=profile,
-            pk=request.data.get("activity")
+            pk=request.data.get("activity_id")
         )
 
         if not activity:
@@ -55,7 +55,7 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
         if serializer.is_valid():
 
             report_already_done = ReportActivity.objects.filter(
-                activity=request.data.get("activity"),
+                activity=request.data.get("activity_id"),
                 profile=profile,
                 created_at__contains=datetime.today().strftime("%Y-%m-%d")
             )

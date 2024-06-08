@@ -14,6 +14,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 class ReportActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportActivity
-        fields = ["id", "profile", "activity", "effort_perception", "completed", "completed_at"]
-
-    completed_at = serializers.DateTimeField(read_only=True)
+        fields = ["id", "profile", "activity_id", "activity", "effort_perception", "completed", "completed_at"]
+    
+    activity = ActivitySerializer(read_only=True)
+    activity_id = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all(), source='activity', write_only=True)
