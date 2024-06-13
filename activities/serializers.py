@@ -21,3 +21,4 @@ class ReportActivitySerializer(serializers.ModelSerializer):
     
     activity = ActivitySerializer(read_only=True)
     activity_id = serializers.PrimaryKeyRelatedField(queryset=Activity.objects.all(), source='activity', write_only=True)
+    completed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M')
