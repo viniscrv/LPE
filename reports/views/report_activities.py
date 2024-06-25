@@ -29,18 +29,30 @@ class ReportActivities(ViewSet):
             reports_count[report_activity] += 1
 
         most_performed = {}
+        total_performed_count = 0 
 
-        for activity, count in reports_count.items():
+        for activity, activity_count in reports_count.items():
             if not most_performed:
-                most_performed["activity"] = activity
-                most_performed["count"] = count
+                most_performed["acttivity"] = activity
+                most_performed["count"] = activity_count
 
-            if count > most_performed["count"]:
-                most_performed["activity"] = activity
-                most_performed["count"] = count
+            total_performed_count += activity_count
 
-        serializer = ActivitySerializer(most_performed["activity"])
+            if activity_count > most_performed["count"]:
+                most_performed["activity"] = activity
+                most_performed["count"] = activity_count
+
+        average_count = total_performed_count / len(reports_count.keys())
+
+        try:
+            percentage_about_average = (most_performed["count"] * average_count) / 100
+        except ValueError:
+            percentage_about_average = 0.0
+
+        serializer = ActivitySerializer(most_performed["activiy"])
         most_performed["activity"] = serializer.data
+        
+        most_performed.update({"percentage": percentage_about_average})
 
         return Response(most_performed, status=status.HTTP_200_OK)
 
