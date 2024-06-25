@@ -45,8 +45,8 @@ class ReportActivities(ViewSet):
         average_count = total_performed_count / len(reports_count.keys())
 
         try:
-            percentage_about_average = (most_performed["count"] * average_count) / 100
-        except ValueError:
+            percentage_about_average = (most_performed["count"] / average_count) * 100
+        except ZeroDivisionError:
             percentage_about_average = 0.0
 
         serializer = ActivitySerializer(most_performed["activiy"])
