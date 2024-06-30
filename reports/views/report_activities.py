@@ -94,7 +94,7 @@ class ReportActivities(ViewSet):
             activity = report.activity
 
             if activity not in streaks:
-                streaks[activity] = { "streak": 1, "previous_date": report.completed_at }
+                streaks[activity] = { "streak": 1, "previous_date": report.completed_at, "since": report.completed_at }
 
                 continue
 
@@ -112,10 +112,12 @@ class ReportActivities(ViewSet):
             if not best_streak:
                 best_streak["activity"] = activity
                 best_streak["streak"] = streak["streak"]
+                best_streak["since"] = streak["since"]
 
             if streak["streak"] > best_streak["streak"]:
                 best_streak["activity"] = activity
                 best_streak["streak"] = streak["streak"]
+                best_streak["since"] = streak["since"]
 
         serializer = ActivitySerializer(best_streak["activity"])
         best_streak["activity"] = serializer.data
