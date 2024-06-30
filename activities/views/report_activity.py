@@ -49,13 +49,18 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
 
         if not activity:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        report_data = request.data
 
-        serializer = ReportActivitySerializer(data=request.data)
+        if not report_data.get("completed_at"):
+            report_data["completed_at"] = datetime.now()
+
+        serializer = ReportActivitySerializer(data=report_data)
 
         if serializer.is_valid():
 
             report_already_done = ReportActivity.objects.filter(
-                activity=request.data.get("activity_id"),
+                activity=report_data.get("activity_id"),
                 profile=profile,
                 created_at__contains=datetime.today().strftime("%Y-%m-%d")
             )
@@ -66,7 +71,7 @@ class ReportActivityViewSet(ActivityMixin, ViewSet):
             serializer.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request, pk):
