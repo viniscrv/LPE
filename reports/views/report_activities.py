@@ -33,7 +33,7 @@ class ReportActivities(ViewSet):
 
         for activity, activity_count in reports_count.items():
             if not most_performed:
-                most_performed["acttivity"] = activity
+                most_performed["activity"] = activity
                 most_performed["count"] = activity_count
 
             total_performed_count += activity_count
@@ -49,7 +49,7 @@ class ReportActivities(ViewSet):
         except ZeroDivisionError:
             percentage_about_average = 0.0
 
-        serializer = ActivitySerializer(most_performed["activiy"])
+        serializer = ActivitySerializer(most_performed["activity"])
         most_performed["activity"] = serializer.data
         
         most_performed.update({"percentage": percentage_about_average})
