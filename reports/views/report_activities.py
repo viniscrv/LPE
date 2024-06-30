@@ -8,6 +8,7 @@ from activities.models import ReportActivity
 from activities.serializers import ActivitySerializer
 from profiles.models import Profile
 from datetime import timedelta
+from achievements.utils import validate_and_create_new_achievements
 
 class ReportActivities(ViewSet):
     permission_classes = [IsAuthenticated]
@@ -53,6 +54,12 @@ class ReportActivities(ViewSet):
         most_performed["activity"] = serializer.data
         
         most_performed.update({"percentage": percentage_about_average})
+
+        validate_and_create_new_achievements(
+            profile=profile, 
+            activity=most_performed["activity"], 
+            type="new_more_performed"
+        )
 
         return Response(most_performed, status=status.HTTP_200_OK)
 
@@ -122,6 +129,12 @@ class ReportActivities(ViewSet):
         serializer = ActivitySerializer(best_streak["activity"])
         best_streak["activity"] = serializer.data
 
+        validate_and_create_new_achievements(
+            profile=profile, 
+            activity=best_streak["activity"], 
+            type="new_best_streak"
+        )
+
         return Response(best_streak, status=status.HTTP_200_OK)
     
     # TODO: nome paia
@@ -175,5 +188,13 @@ class ReportActivities(ViewSet):
         for level in edges_activity:
             serializer = ActivitySerializer(edges_activity[level]["activity"])
             edges_activity[level]["activity"] = serializer.data
+
+            achievement_type = "new_harder_activity" if level == "highest" else "new_easier_activity"
+
+            validate_and_create_new_achievements(
+                profile=profile, 
+                activity=edges_activity[level]["activity"], 
+                type=achievement_type
+            )
 
         return Response(edges_activity, status=status.HTTP_200_OK)

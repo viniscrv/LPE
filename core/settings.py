@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'profiles',
     'activities',
     'reports',
+    'achievements',
 ]
 
 MIDDLEWARE = [

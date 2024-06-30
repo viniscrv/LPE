@@ -9,6 +9,7 @@ from profiles.models import Profile
 from datetime import datetime, timedelta
 from django.db.models import Q
 from activities.serializers import ActivitySerializer
+from achievements.utils import validate_and_create_new_achievements
 
 class ReportHabits(ViewSet):
     permission_classes = [IsAuthenticated]
