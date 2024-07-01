@@ -5,11 +5,29 @@ from django.contrib.auth import get_user_model
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["id", "user", "username", "biography"]
+        fields = ["id", "user", "first_name", "last_name", "username", "email", "biography"]
+
+    first_name = serializers.CharField(
+        max_length=155, 
+        source="user.first_name", 
+        read_only=True
+    )
+
+    last_name = serializers.CharField(
+        max_length=155, 
+        source="user.last_name", 
+        read_only=True
+    )
 
     username = serializers.CharField(
         max_length=155, 
         source="user.username", 
+        read_only=True
+    )
+
+    email = serializers.CharField(
+        max_length=155, 
+        source="user.email", 
         read_only=True
     )
 
