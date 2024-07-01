@@ -2,6 +2,10 @@ from django.db import models
 from datetime import datetime
 from profiles.models import Profile
 
+from django.db.models.signals import post_delete, pre_save, post_save
+from django.dispatch import receiver
+# from recent_activity.utils import create_recent_activity
+
 class ActivityGroup(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -68,3 +72,14 @@ class ReportActivity(models.Model):
             self.completed_at = None
 
         return super().save(*args, **kwargs)
+    
+
+@receiver(signal=post_save, sender=ReportActivity)
+def create(sender, instance, **kwargs):
+    from recent_activity.utils import create_recent_activity
+
+    create_recent_activity(
+        profile=instance.profile,
+        activity=instance.activity,
+        type="create",
+    )
