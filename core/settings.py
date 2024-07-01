@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'activities',
     'reports',
     'achievements',
+    'recent_activity',
 ]
 
 MIDDLEWARE = [
