@@ -7,8 +7,9 @@ from rest_framework import status
 from activities.models import ReportActivity
 from activities.serializers import ActivitySerializer
 from profiles.models import Profile
-from datetime import timedelta
+from datetime import datetime, timedelta
 from achievements.utils import validate_and_create_new_achievements
+from django.db.models import Q
 
 class ReportActivities(ViewSet):
     permission_classes = [IsAuthenticated]
@@ -198,3 +199,37 @@ class ReportActivities(ViewSet):
             )
 
         return Response(edges_activity, status=status.HTTP_200_OK)
+    
+    @action(methods=["get"], detail=False)
+    def get_heat_map(self, request):
+        profile = get_object_or_404(Profile, user=request.user.id)
+        
+        heat_map = {}
+
+        current_year = datetime.now().year
+        start_date = datetime.date(current_year, 1, 1)
+        end_date = datetime.date(current_year, 12, 31)
+
+        date_iterator = start_date
+
+        while date_iterator <= end_date:
+            heat_map[date_iterator.strftime("%Y-%m-%d")] = 0
+            date_iterator += timedelta(days=1)
+
+        reports = ReportActivity.objects.filter(
+            Q(profile=profile),
+            # Q(completed_at__contains=(datetime.today() - timedelta(year=1)).strftime("%Y-%m-%d"))
+        )
+
+        for report in reports:
+            report_activity = report.activity
+            
+            report_completed_at = report_activity.completed_at
+            report_completed_at = report_completed_at.strftime("%Y-%m-%d")
+
+            if report_completed_at in heat_map.keys():
+                heat_map[report_completed_at] += 1
+
+        formatted_heat_map = [{"day": key, "value": value} for key, value in heat_map.items()]
+
+        return Response(formatted_heat_map, status=status.HTTP_200_OK)
