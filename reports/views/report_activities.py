@@ -192,7 +192,7 @@ class ReportActivities(ViewSet):
             achievement_type = "new_harder_activity" if level == "highest" else "new_easier_activity"
 
             validate_and_create_new_achievements(
-                profile=profile, 
+                profile=profile,
                 activity=edges_activity[level]["activity"], 
                 type=achievement_type
             )
