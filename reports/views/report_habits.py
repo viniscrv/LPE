@@ -102,6 +102,8 @@ class ReportHabits(ViewSet):
 
                 streaks_in_progress.append(data)
 
+        streaks_in_progress = streaks_in_progress[:3]
+
         return Response(streaks_in_progress, status=status.HTTP_200_OK)
     
     @action(methods=["get"], detail=True)

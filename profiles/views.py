@@ -46,16 +46,24 @@ class ProfileView(ViewSet):
     
     def patch(self, request):
         data = request.data
+        user_id = request.user.id
 
-        profile = get_object_or_404(Profile, user=request.user.id)
-        serializer = ProfileSerializer(profile, data=data, partial=True)
+        profile = get_object_or_404(Profile, user=user_id)
+        profile_serializer = ProfileSerializer(profile, data=data, partial=True)
 
-        if serializer.is_valid():
-            serializer.save()
+        User = get_user_model()
+        user = User.objects.get(pk=user_id)
+        user_serializer = UserSerializer(user, data=data, partial=True) 
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        if profile_serializer.is_valid() and user_serializer.is_valid():
+            profile_serializer.save()
+            user_serializer.save()
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        
+        errors = {*profile_serializer, *user_serializer}
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(methods=["patch"], detail=True)
     def edit_password(self, request):
