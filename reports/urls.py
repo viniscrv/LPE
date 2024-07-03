@@ -41,7 +41,7 @@ urlpatterns = [
     ),
     path(
         "heat_map/",
-        ReportHabits.as_view({"get": "get_heat_map"}),
+        ReportActivities.as_view({"get": "get_heat_map"}),
         name="heat_map"
     ),
 ]

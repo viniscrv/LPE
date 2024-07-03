@@ -4,5 +4,5 @@ from .views import AchievementsView
 app_name = "achievements"
 
 urlpatterns = [
-    path("achievements/", AchievementsView.as_view(), name="achievements"),
+    path("", AchievementsView.as_view(), name="achievements"),
 ]

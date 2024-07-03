@@ -7,7 +7,7 @@ from rest_framework import status
 from activities.models import ReportActivity
 from activities.serializers import ActivitySerializer
 from profiles.models import Profile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from achievements.utils import validate_and_create_new_achievements
 from django.db.models import Q
 
@@ -130,6 +130,9 @@ class ReportActivities(ViewSet):
         serializer = ActivitySerializer(best_streak["activity"])
         best_streak["activity"] = serializer.data
 
+        if best_streak.get("since"):
+            best_streak["since"] = streak["since"].strftime("%Y-%m-%d")
+
         validate_and_create_new_achievements(
             profile=profile, 
             activity=best_streak["activity"], 
@@ -207,8 +210,8 @@ class ReportActivities(ViewSet):
         heat_map = {}
 
         current_year = datetime.now().year
-        start_date = datetime.date(current_year, 1, 1)
-        end_date = datetime.date(current_year, 12, 31)
+        start_date = date(current_year, 1, 1)
+        end_date = date(current_year, 12, 31)
 
         date_iterator = start_date
 
@@ -222,10 +225,7 @@ class ReportActivities(ViewSet):
         )
 
         for report in reports:
-            report_activity = report.activity
-            
-            report_completed_at = report_activity.completed_at
-            report_completed_at = report_completed_at.strftime("%Y-%m-%d")
+            report_completed_at = report.completed_at.strftime("%Y-%m-%d")
 
             if report_completed_at in heat_map.keys():
                 heat_map[report_completed_at] += 1

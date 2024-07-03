@@ -94,7 +94,8 @@ class ReportHabits(ViewSet):
                 data["days_until_habit"] = 66 - data["streak"]
 
                 try:
-                    data["percentage_progress"] = (data["days_until_habit"] / 66) * 100 
+                    data["percentage_progress"] = (data["days_until_habit"] / 66) * 100
+                    data["percentage_progress"] = 100 - data["percentage_progress"]
 
                 except ZeroDivisionError:
                     data["percentage_progress"] = 0.0

@@ -20,8 +20,8 @@ class RecentActivityView(APIView):
 
         recent_activities = RecentActivity.objects.filter(profile=profile)
 
-        if recent_activities:
-            recent_activities = recent_activities[-8:]
+        # if recent_activities:
+        #     recent_activities = recent_activities[-8:]
 
         serializer = RecentActivitySerializer(recent_activities, many=True)
 

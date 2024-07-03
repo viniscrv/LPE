@@ -4,4 +4,4 @@ from .models import RecentActivity
 class RecentActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = RecentActivity
-        fields = ["profile", "activity", "type"]
+        fields = ["profile", "activity", "type", "created_at"]

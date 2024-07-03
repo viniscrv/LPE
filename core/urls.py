@@ -23,4 +23,5 @@ urlpatterns = [
     path("activities/", include("activities.urls")),
     path("reports/", include("reports.urls")),
     path("achievements/", include("achievements.urls")),
+    path("recent_activity/", include("recent_activity.urls")),
 ]
