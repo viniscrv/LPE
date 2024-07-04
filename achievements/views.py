@@ -18,11 +18,7 @@ class AchievementsView(APIView):
     def get(self, request):
         profile = self._get_profile(request)
 
-        achievements = Achievement.objects.filter(profile=profile)
-
-        if achievements:
-            achievements = achievements[-8:]
-
+        achievements = Achievement.objects.filter(profile=profile).order_by('-id')[:8]
         serializer = AchievementSerializer(achievements, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

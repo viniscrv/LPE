@@ -57,8 +57,8 @@ class ReportActivities(ViewSet):
         most_performed.update({"percentage": percentage_about_average})
 
         validate_and_create_new_achievements(
-            profile=profile, 
-            activity=most_performed["activity"], 
+            profile=profile.id, 
+            activity=most_performed["activity"].get("id"), 
             type="new_more_performed"
         )
 
@@ -134,8 +134,8 @@ class ReportActivities(ViewSet):
             best_streak["since"] = streak["since"].strftime("%Y-%m-%d")
 
         validate_and_create_new_achievements(
-            profile=profile, 
-            activity=best_streak["activity"], 
+            profile=profile.id, 
+            activity=best_streak["activity"].get("id"), 
             type="new_best_streak"
         )
 
@@ -196,8 +196,8 @@ class ReportActivities(ViewSet):
             achievement_type = "new_harder_activity" if level == "highest" else "new_easier_activity"
 
             validate_and_create_new_achievements(
-                profile=profile,
-                activity=edges_activity[level]["activity"], 
+                profile=profile.id,
+                activity=edges_activity[level]["activity"].get("id"), 
                 type=achievement_type
             )
 
