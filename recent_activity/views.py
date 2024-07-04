@@ -18,11 +18,7 @@ class RecentActivityView(APIView):
     def get(self, request):
         profile = self._get_profile(request)
 
-        recent_activities = RecentActivity.objects.filter(profile=profile)
-
-        # if recent_activities:
-        #     recent_activities = recent_activities[-8:]
-
+        recent_activities = RecentActivity.objects.filter(profile=profile).order_by('-id')[:10]
         serializer = RecentActivitySerializer(recent_activities, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

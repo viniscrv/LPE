@@ -9,7 +9,7 @@ def create_recent_activity(profile, activity, type):
 
     recent_activity_data = {
         "profile": profile,
-        "activity": activity,
+        "activity_id": activity,
         "type": type_map.get(type, "complete_report")
     }
 

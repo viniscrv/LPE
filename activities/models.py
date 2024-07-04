@@ -4,6 +4,7 @@ from profiles.models import Profile
 
 from django.db.models.signals import post_delete, pre_save, post_save
 from django.dispatch import receiver
+from django.forms.models import model_to_dict
 # from recent_activity.utils import create_recent_activity
 
 class ActivityGroup(models.Model):
@@ -75,11 +76,23 @@ class ReportActivity(models.Model):
     
 
 @receiver(signal=post_save, sender=ReportActivity)
-def create(sender, instance, **kwargs):
+def create_edit_report(sender, instance, **kwargs):
+    from recent_activity.utils import create_recent_activity
+
+    recent_activity_type = "create" if kwargs.get("created") else "edit"
+    
+    create_recent_activity(
+        profile=instance.profile.id,
+        activity=instance.activity.id,
+        type=recent_activity_type,
+    )
+
+@receiver(signal=post_delete, sender=ReportActivity)
+def delete_report(sender, instance, **kwargs):
     from recent_activity.utils import create_recent_activity
 
     create_recent_activity(
-        profile=instance.profile,
-        activity=instance.activity,
-        type="create",
+        profile=instance.profile.id,
+        activity=instance.activity.id,
+        type="delete",
     )
