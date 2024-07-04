@@ -58,6 +58,9 @@ class ActivityView(ActivityMixin, APIView):
                 return Response({"detail": "Activity group not found."}, status=status.HTTP_404_NOT_FOUND)
 
         activity = get_object_or_404(Activity.objects.filter(profile=profile), pk=pk)
+
+        request.data.update({"activity_group": request.data["activity_group_id"]})
+
         serializer = ActivitySerializer(activity, data=request.data, partial=True)
 
         if serializer.is_valid():
